@@ -14,6 +14,8 @@ float timeout; // unit: us
 float dist_min, dist_max, dist_raw; // unit: mm
 unsigned long last_sampling_time; // unit: ms
 float scale; // used for pulse duration to distance conversion
+float caculate_time = 255;
+float before_dist = 0;
 
 void setup() {
 // initialize GPIO pins
@@ -49,21 +51,27 @@ void loop() {
   Serial.print("raw:");
   Serial.print(dist_raw);
   Serial.print(",");
-  Serial.println("Max:400");
 
 // turn on the LED if the distance is between dist_min and dist_max
-  if(dist_raw < dist_min || dist_raw > dist_max) {
+  if (dist_raw == 0) {
+    analogWrite(PIN_LED, caculate_time);
+  } else if(dist_raw < dist_min || dist_raw > dist_max) {
     analogWrite(PIN_LED, 255); //꺼짐
+    caculate_time = 255;
   } else if (dist_raw == 200){
     analogWrite(PIN_LED, 0); //켜짐
-  } else if (dist_raw < 200) {
-    analogWrite(PIN_LED, 255 - 255 / ((200 - dist_raw) / 100));
-  } else if (dist_raw > 200) {
-    analogWrite(PIN_LED, 255 / ((300 - dist_raw) / 100));
+    caculate_time = 0;
+  } else if (dist_raw < 200 && dist_raw >= dist_min) {
+    caculate_time = 255 * (200 - dist_raw) / 100;
+    analogWrite(PIN_LED, caculate_time);
+  } else if (dist_raw > 200 && dist_raw <= dist_max) {
+    caculate_time = 255 - 255 * (300 - dist_raw) / 100;
+    analogWrite(PIN_LED, caculate_time);
   }
 
-// do something here
-//  delay(50); // Assume that it takes 50ms to do something.
+  Serial.print("led:");
+  Serial.print(caculate_time);
+  Serial.println("Max:400");
   
 // update last sampling time
   last_sampling_time += INTERVAL;
