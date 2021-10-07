@@ -11,69 +11,73 @@
 
 // global variables
 float timeout; // unit: us
-float dist_min, dist_max, dist_raw; // unit: mm
+float dist_min, dist_max, dist_raw, dist_raw_before; // unit: mm
 unsigned long last_sampling_time; // unit: ms
 float scale; // used for pulse duration to distance conversion
 float caculate_time = 255;
 float before_dist = 0;
 
 void setup() {
-// initialize GPIO pins
-  pinMode(PIN_LED,OUTPUT);
-  pinMode(PIN_TRIG,OUTPUT);
-  digitalWrite(PIN_TRIG, LOW); 
-  pinMode(PIN_ECHO,INPUT);
+  // initialize GPIO pins
+  pinMode(PIN_LED, OUTPUT);
+  pinMode(PIN_TRIG, OUTPUT);
+  digitalWrite(PIN_TRIG, LOW);
+  pinMode(PIN_ECHO, INPUT);
 
-// initialize USS related variables
-  dist_min = _DIST_MIN; 
+  // initialize USS related variables
+  dist_min = _DIST_MIN;
   dist_max = _DIST_MAX;
   timeout = (INTERVAL / 2) * 1000.0; // precalculate pulseIn() timeout value. (unit: us)
   dist_raw = 0.0; // raw distance output from USS (unit: mm)
   scale = 0.001 * 0.5 * SND_VEL;
 
-// initialize serial port
+  // initialize serial port
   Serial.begin(57600);
 
-// initialize last sampling time
+  // initialize last sampling time
   last_sampling_time = 0;
 }
 
 void loop() {
-// wait until next sampling time. 
-// millis() returns the number of milliseconds since the program started. Will overflow after 50 days.
-  if(millis() < last_sampling_time + INTERVAL) return;
+  // wait until next sampling time.
+  // millis() returns the number of milliseconds since the program started. Will overflow after 50 days.
+  if (millis() < last_sampling_time + INTERVAL) return;
 
-// get a distance reading from the USS
-  dist_raw = USS_measure(PIN_TRIG,PIN_ECHO);
+  // get a distance reading from the USS
+  dist_raw = USS_measure(PIN_TRIG, PIN_ECHO);
 
-// output the read value to the serial port
-  Serial.print("Min:0,");
-  Serial.print("raw:");
-  Serial.print(dist_raw);
-  Serial.print(",");
-
-// turn on the LED if the distance is between dist_min and dist_max
+  // turn on the LED if the distance is between dist_min and dist_max
   if (dist_raw == 0) {
     analogWrite(PIN_LED, caculate_time);
-  } else if(dist_raw < dist_min || dist_raw > dist_max) {
+  } else if (dist_raw < dist_min || dist_raw > dist_max) {
     analogWrite(PIN_LED, 255); //꺼짐
     caculate_time = 255;
-  } else if (dist_raw == 200){
+    if (dist_raw < dist_min)
+      dist_raw_before = dist_min;
+    else if (dist_raw > dist_max)
+      dist_raw_before = dist_max;
+  } else if (dist_raw == 200) {
     analogWrite(PIN_LED, 0); //켜짐
     caculate_time = 0;
+    dist_raw_before = 200;
   } else if (dist_raw < 200 && dist_raw >= dist_min) {
     caculate_time = 255 * (200 - dist_raw) / 100;
+    dist_raw_before = dist_raw;
     analogWrite(PIN_LED, caculate_time);
   } else if (dist_raw > 200 && dist_raw <= dist_max) {
     caculate_time = 255 - 255 * (300 - dist_raw) / 100;
+    dist_raw_before = dist_raw;
     analogWrite(PIN_LED, caculate_time);
   }
 
-  Serial.print("led:");
-  Serial.print(caculate_time);
+  // output the read value to the serial port
+  Serial.print("Min:0,");
+  Serial.print("raw:");
+  Serial.print(dist_raw_before);
+  Serial.print(",");
   Serial.println("Max:400");
-  
-// update last sampling time
+
+  // update last sampling time
   last_sampling_time += INTERVAL;
 }
 
@@ -85,8 +89,9 @@ float USS_measure(int TRIG, int ECHO)
   delayMicroseconds(10);
   digitalWrite(TRIG, LOW);
   reading = pulseIn(ECHO, HIGH, timeout) * scale; // unit: mm
-  if(reading < dist_min || reading > dist_max) reading = 0.0; // return 0 when out of range.
+  if (reading < dist_min || reading > dist_max) reading = 0.0; // return 0 when out of range.
   return reading;
+
   // Pulse duration to distance conversion example (target distance = 17.3m)
   // - round trip distance: 34.6m
   // - expected pulse duration: 0.1 sec, or 100,000us
