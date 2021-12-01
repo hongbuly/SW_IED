@@ -24,7 +24,7 @@
 #define _INTERVAL_SERIAL 100
 
 // PID parameters
-#define _KP 0.68;
+#define _KP 0.74;
 #define _KI 0.0007;
 #define _KD 39;
 
@@ -125,7 +125,7 @@ void loop() {
     error_curr = dist_target - dist_ema;
     pterm = error_curr;
 
-    if (-10 < error_curr && error_curr < 10)
+    if (-5 < error_curr && error_curr < 5)
     {
       iterm = 0;
     }
@@ -141,16 +141,14 @@ void loop() {
     contrl = kp * pterm + ki * iterm + kd * dterm;
     //keep control value within the range
     contrl = map(contrl, -180, 180, _DUTY_MIN, _DUTY_MAX);
-    contrl = constrain(contrl, _DUTY_MIN, _DUTY_MAX);
+    if(contrl < _DUTY_MIN) contrl = _DUTY_MIN;
+    if(contrl > _DUTY_MAX) contrl = _DUTY_MAX;
     error_prev = error_curr;
   }
 
   if (event_servo) {
     event_servo = false;
     // adjust servo position according to the ir_distance
-    //    if (dist_ema < 200.0) myservo.writeMicroseconds(_DUTY_MAX);
-    //    else if (dist_ema <= 350.0 && dist_ema >= 200.0)myservo.writeMicroseconds(_DUTY_NEU);
-    //    else if (dist_ema > 350.0) myservo.writeMicroseconds(_DUTY_MIN);
     myservo.writeMicroseconds(contrl);
   }
 
@@ -167,8 +165,6 @@ void loop() {
     Serial.print(iterm * ki);
     Serial.print(",d:");
     Serial.print(dterm * kd);
-    Serial.print(",contrl:");
-    Serial.print(contrl);
     Serial.println(",min:70,max:410");
   }
 
