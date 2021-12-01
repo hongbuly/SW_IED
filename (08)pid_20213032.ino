@@ -10,9 +10,9 @@
 #define _DIST_MIN 70
 #define _DIST_MAX 410
 
-#define _DUTY_MIN 1640 //up
+#define _DUTY_MIN 1610 //up
 #define _DUTY_NEU 1700
-#define _DUTY_MAX 1850 //down
+#define _DUTY_MAX 1880 //down
 
 #define _SERVO_ANGLE 30
 #define _SERVO_SPEED 30 // servo speed limit (unit: degree/second)
@@ -24,9 +24,9 @@
 #define _INTERVAL_SERIAL 100
 
 // PID parameters
-#define _KP 1.2;
-#define _KI 0.2;
-#define _KD 3.2;
+#define _KP 0.68;
+#define _KI 0.0007;
+#define _KD 39;
 
 Servo myservo;
 
@@ -125,21 +125,23 @@ void loop() {
     error_curr = dist_target - dist_ema;
     pterm = error_curr;
 
-    if (-20 < error_curr && error_curr < 20)
-    {
-      iterm += error_curr;
-    }
-    else
+    if (-10 < error_curr && error_curr < 10)
     {
       iterm = 0;
     }
-
+    else if (-30 < error_curr && error_curr < 30)
+    {
+      iterm += error_curr * _INTERVAL_DIST;
+    } 
+    else {
+      iterm = 0;
+    }
     dterm = (error_curr - error_prev) / _INTERVAL_DIST;
 
     contrl = kp * pterm + ki * iterm + kd * dterm;
     //keep control value within the range
-    //contrl = constrain(contrl, _DUTY_MIN, _DUTY_MAX);
     contrl = map(contrl, -180, 180, _DUTY_MIN, _DUTY_MAX);
+    contrl = constrain(contrl, _DUTY_MIN, _DUTY_MAX);
     error_prev = error_curr;
   }
 
@@ -159,9 +161,13 @@ void loop() {
     Serial.print(dist_raw);
     Serial.print(",dist_ema:");
     Serial.print(dist_ema);
-    Serial.print(",pterm:");
-    Serial.print(pterm);
-    Serial.print(",pid:");
+    Serial.print(",p:");
+    Serial.print(pterm * kp);
+    Serial.print(",i:");
+    Serial.print(iterm * ki);
+    Serial.print(",d:");
+    Serial.print(dterm * kd);
+    Serial.print(",contrl:");
     Serial.print(contrl);
     Serial.println(",min:70,max:410");
   }
