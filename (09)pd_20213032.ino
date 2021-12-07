@@ -73,7 +73,7 @@ void setup() {
   // convert angle speed into duty change per interval
   duty_chg_per_interval = (_DUTY_MAX - _DUTY_MIN) * (_SERVO_SPEED / 180.0) * (INTERVAL / 1000.0);
   duty_curr = duty_target = 0;
-  
+
   // initialize variables for PID
   kp = _KP;
   ki = _KI;
@@ -175,9 +175,9 @@ void loop() {
     Serial.print("dist_ir:");
     Serial.print(dist_raw);
     Serial.print(",pterm:");
-    Serial.print(map(pterm * kp, -1000, 1000, 510, 610));
+    Serial.print(map(pterm * kp, -300, 300, 510, 610));
     Serial.print(",dterm:");
-    Serial.print(map(dterm * kd, -1000, 1000, 510, 610));
+    Serial.print(map(dterm * kd, -300, 300, 510, 610));
     Serial.print(",duty_target:");
     Serial.print(map(duty_target, 1000, 2000, 410, 510));
     Serial.print(",duty_curr:");
