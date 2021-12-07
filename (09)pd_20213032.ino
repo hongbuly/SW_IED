@@ -26,7 +26,7 @@
 // PID parameters
 #define _KP 0.75;
 #define _KI 0.0007;
-#define _KD 40;
+#define _KD 32;
 
 Servo myservo;
 
