@@ -138,7 +138,7 @@ void loop() {
     }
     dterm = (error_curr - error_prev) / _INTERVAL_DIST;
 
-    contrl = kp * pterm + ki * iterm + kd * dterm;
+    contrl = kp * pterm;
     //keep control value within the range
     contrl = map(contrl, -180, 180, _DUTY_MIN, _DUTY_MAX);
     if(contrl < _DUTY_MIN) contrl = _DUTY_MIN;
