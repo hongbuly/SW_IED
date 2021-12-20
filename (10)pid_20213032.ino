@@ -26,8 +26,8 @@
 #define _ITERM_MAX 20;
 
 // PID parameters
-#define _KP 0.281;
-#define _KI 0.000672;
+#define _KP 0.34;
+#define _KI 0.0017;
 #define _KD 32.1;
 
 Servo myservo;
