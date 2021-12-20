@@ -11,7 +11,7 @@
 #define _DIST_MAX 410
 
 #define _DUTY_MIN 1240 //up
-#define _DUTY_NEU 1385
+#define _DUTY_NEU 1370
 #define _DUTY_MAX 1510 //down
 
 #define _SERVO_SPEED 1000 // servo speed limit (unit: degree/second)
@@ -26,9 +26,9 @@
 #define _ITERM_MAX 50;
 
 // PID parameters
-#define _KP 0.34;
+#define _KP 0.44;
 #define _KI 0.0017;
-#define _KD 32.1;
+#define _KD 37.1;
 
 Servo myservo;
 
