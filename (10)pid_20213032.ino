@@ -11,7 +11,7 @@
 #define _DIST_MAX 410
 
 #define _DUTY_MIN 1240 //up
-#define _DUTY_NEU 1380
+#define _DUTY_NEU 1385
 #define _DUTY_MAX 1510 //down
 
 #define _SERVO_SPEED 1000 // servo speed limit (unit: degree/second)
@@ -23,7 +23,7 @@
 #define _INTERVAL_SERVO 10
 #define _INTERVAL_SERIAL 400
 
-#define _ITERM_MAX 20;
+#define _ITERM_MAX 50;
 
 // PID parameters
 #define _KP 0.34;
@@ -198,9 +198,6 @@ void loop() {
     }
     else if (iterm < -iterm_max) {
       iterm = -_ITERM_MAX;
-    }
-    if (dist_ema > 220 && dist_ema < 265) {
-      iterm /= 5;
     }
 
     // control smoothly d
